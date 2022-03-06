@@ -62,8 +62,9 @@ namespace MustDo.Controllers {
         }
 
         [HttpGet]
-        public List<Note> GetNotes([FromQuery] string sessionId) {
-            var output = new List<Note>();
+        public List<NoteResponseObject> GetNotes([FromQuery] string sessionId) {
+            var output = new List<NoteResponseObject>();
+
             var names = from session in SessionIds
                         where session.Value == sessionId
                         select session.Key;
@@ -73,7 +74,12 @@ namespace MustDo.Controllers {
 
             var context = new MustDoContext();
             var user = context.Users.First(user => user.Name == name);
-            output = context.Notes.Where(note => note.UserId == user.Id).ToList();
+
+            output = context.Notes.Where(note => note.UserId == user.Id).Select(note => new NoteResponseObject {
+                Id = note.Id,
+                Content = note.Content,
+                Name = note.Name
+            }).ToList();
 
             return output;
         }
